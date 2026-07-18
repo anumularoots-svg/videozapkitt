@@ -1,0 +1,80 @@
+cat > .github/workflows/ci.yml << 'ENDOFFILE'
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install test dependencies
+        working-directory: backend
+        run: pip install pytest pytest-asyncio structlog pydantic pydantic-settings httpx
+
+      - name: Run pure-logic tests
+        working-directory: backend
+        run: pytest tests/ -v
+
+  license-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for non-commercial models
+        run: |
+          set -e
+          if grep -rnE "FLUX\.1-dev|facebook/musicgen" backend/providers/ \
+               | grep -vE "^[^:]+:[0-9]+:\s*#|reject|refus|non.?commercial|must not|avoid|never|do not"; then
+            echo "::error::Non-commercial model in active provider code."
+            exit 1
+          fi
+          echo "License gate passed."
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.5"
+
+      - name: Validate modules
+        working-directory: infrastructure/terraform
+        run: |
+          set -e
+          for dir in modules/* envs/* bootstrap; do
+            if ls "$dir"/*.tf >/dev/null 2>&1; then
+              echo "=== validating $dir ==="
+              terraform -chdir="$dir" init -backend=false -input=false >/dev/null
+              terraform -chdir="$dir" validate
+            fi
+          done
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install and build
+        working-directory: frontend
+        run: |
+          npm ci || npm install
+          npm run build
+ENDOFFILE
