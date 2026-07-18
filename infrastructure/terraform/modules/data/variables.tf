@@ -30,7 +30,7 @@ variable "client_security_group_ids" {
 
 variable "postgres_version" {
   type    = string
-  default = "16.4"
+  default = "16"
 }
 
 variable "db_instance_class" {
