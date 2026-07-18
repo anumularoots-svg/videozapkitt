@@ -33,4 +33,13 @@ jobs:
           TF_VAR_llm_api_key: ${{ secrets.LLM_API_KEY }}
         run: |
           terraform init -input=false
+          
+          # Step 1: Create network + security groups first
+          terraform apply -auto-approve -input=false \
+            -target=module.network \
+            -target=module.api.aws_security_group.task \
+            -target=module.api.aws_security_group.alb \
+            -target=module.gpu_workers.aws_security_group.worker
+          
+          # Step 2: Full apply now that SG IDs exist
           terraform apply -auto-approve -input=false
