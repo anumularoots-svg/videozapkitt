@@ -35,11 +35,11 @@ jobs:
           terraform init -input=false
           
           # Step 1: Create network + security groups first
-          terraform apply -auto-approve -input=false \
+          terraform apply -auto-approve -input=false -var='alarm_emails=["anumula.roots@gmail.com"]' \
             -target=module.network \
             -target=module.api.aws_security_group.task \
             -target=module.api.aws_security_group.alb \
             -target=module.gpu_workers.aws_security_group.worker
           
           # Step 2: Full apply now that SG IDs exist
-          terraform apply -auto-approve -input=false
+          terraform apply -auto-approve -input=false -var='alarm_emails=["anumula.roots@gmail.com"]'
