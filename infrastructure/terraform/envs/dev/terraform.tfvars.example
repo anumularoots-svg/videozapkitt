@@ -1,0 +1,26 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+
+# Required -- OIDC trust binds to exactly this repo. A wrong value here lets the
+# wrong repository assume your deploy role.
+github_repo = "anumularoots-svg/dev-video.zapkitt.com"
+
+# Where budget + alarm mail goes. Each address confirms an SNS email once.
+alarm_emails = ["lancieret@gmail.com"]
+
+# Groq API key (free tier). Prefer setting this via the TF_VAR_llm_api_key
+# environment variable in CI rather than writing it to a file.
+# llm_api_key = "gsk_..."
+
+# ── Optional overrides (defaults are the cheap dev tier) ──
+
+# aws_region         = "ap-south-1"
+# max_gpu_workers    = 2
+# monthly_budget_usd = "75"
+
+# Baked GPU AMI id from Packer. Until set, scale-up downloads ~35GB per new box.
+# gpu_ami_id = "ami-xxxxxxxx"
+
+# ACM cert for HTTPS. Without it the ALB serves plain HTTP (fine for dev only).
+# certificate_arn = "arn:aws:acm:ap-south-1:...:certificate/..."

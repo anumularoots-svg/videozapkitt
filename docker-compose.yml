@@ -1,0 +1,131 @@
+version: "3.9"
+
+services:
+  # ── Backend API ──────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./character_packs:/app/character_packs
+      - ./templates:/app/templates
+    networks:
+      - app-network
+
+  # ── Celery Worker ────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/Dockerfile.worker
+    env_file: .env
+    environment:
+      # Local dev has no SQS. Force the Redis broker; prod defaults to sqs.
+      CELERY_BROKER: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./character_packs:/app/character_packs
+      - render-data:/tmp/render
+    networks:
+      - app-network
+
+  # ── Frontend ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infrastructure/docker/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    networks:
+      - app-network
+
+  # ── PostgreSQL ───────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: video_compiler
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # ── Redis ────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # ── MinIO (S3-compatible storage) ────────────────
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    networks:
+      - app-network
+
+  # ── Flower (Celery monitoring) ───────────────────
+  flower:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/Dockerfile.worker
+    command: celery -A workers.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file: .env
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
+  render-data:
+
+networks:
+  app-network:
+    driver: bridge

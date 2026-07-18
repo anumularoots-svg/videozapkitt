@@ -1,0 +1,30 @@
+{
+  "id": "narrator_m_01",
+  "name": "Arjun",
+  "gender": "male",
+  "age": "30",
+  "age_range": "adult",
+  "style": "cinematic",
+  "voice_id": "narrator_m_01",
+  "language_support": ["en", "te", "hi", "ta", "kn"],
+  "supported_styles": ["cinematic", "corporate", "storytelling"],
+  "appearance": "Indian male, 30 years old, clean shaven, black hair, warm brown eyes",
+  "clothing_default": "dark navy blazer, white shirt",
+  "camera_presets": ["close_up", "medium", "wide", "over_shoulder"],
+  "pose_presets": ["standing", "sitting", "walking", "explaining", "thinking"],
+  "emotion_presets": ["neutral", "happy", "sad", "serious", "motivated", "excited", "thoughtful"],
+  "reference_images": {
+    "front_neutral": "reference/front_neutral.png",
+    "front_happy": "reference/front_happy.png",
+    "front_sad": "reference/front_sad.png",
+    "front_serious": "reference/front_serious.png",
+    "left_neutral": "reference/left_neutral.png",
+    "right_neutral": "reference/right_neutral.png",
+    "explaining": "reference/explaining.png",
+    "thinking": "reference/thinking.png",
+    "walking": "reference/walking.png",
+    "sitting": "reference/sitting.png",
+    "standing_full": "reference/standing_full.png",
+    "close_up": "reference/close_up.png"
+  }
+}

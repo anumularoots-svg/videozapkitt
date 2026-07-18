@@ -1,0 +1,38 @@
+{
+  "educational": {
+    "name": "Educational Explainer",
+    "description": "Hook → Problem → Explain → Example → Benefits → CTA",
+    "min_duration": 30,
+    "max_duration": 60,
+    "recommended_characters": ["narrator_m_01", "narrator_f_01", "business_m_01"],
+    "music_style": "corporate_soft",
+    "pacing": "moderate"
+  },
+  "motivational": {
+    "name": "Motivational Story",
+    "description": "Hook → Struggle → Turning Point → Growth → Triumph → Message",
+    "min_duration": 30,
+    "max_duration": 60,
+    "recommended_characters": ["young_m_01", "young_f_01", "narrator_m_01"],
+    "music_style": "emotional_to_epic",
+    "pacing": "building"
+  },
+  "story": {
+    "name": "Storytelling",
+    "description": "Hook → Setup → Conflict → Journey → Climax → Resolution",
+    "min_duration": 30,
+    "max_duration": 60,
+    "recommended_characters": ["young_m_01", "young_f_01"],
+    "music_style": "cinematic",
+    "pacing": "dramatic"
+  },
+  "corporate": {
+    "name": "Corporate Explainer",
+    "description": "Hook → Pain Point → Solution → Features → Proof → CTA",
+    "min_duration": 30,
+    "max_duration": 60,
+    "recommended_characters": ["business_m_01", "business_f_01", "corporate_m_01"],
+    "music_style": "corporate",
+    "pacing": "steady"
+  }
+}

@@ -1,0 +1,53 @@
+"""Capability providers. See ARCHITECTURE.md §3."""
+
+from .base import (
+    Alignment,
+    AlignmentProvider,
+    AudioAsset,
+    Capabilities,
+    ImageAsset,
+    ImageProvider,
+    ImageRequest,
+    License,
+    LLMProvider,
+    MusicProvider,
+    MusicRequest,
+    Provenance,
+    Provider,
+    ProviderError,
+    TTSProvider,
+    TTSRequest,
+    UnsupportedCapability,
+    VideoAsset,
+    VideoProvider,
+    VideoRequest,
+    WordTiming,
+)
+from .bootstrap import build_registry
+from .registry import ProviderRegistry
+
+__all__ = [
+    "Alignment",
+    "AlignmentProvider",
+    "AudioAsset",
+    "Capabilities",
+    "ImageAsset",
+    "ImageProvider",
+    "ImageRequest",
+    "License",
+    "LLMProvider",
+    "MusicProvider",
+    "MusicRequest",
+    "Provenance",
+    "Provider",
+    "ProviderError",
+    "ProviderRegistry",
+    "TTSProvider",
+    "TTSRequest",
+    "UnsupportedCapability",
+    "VideoAsset",
+    "VideoProvider",
+    "VideoRequest",
+    "WordTiming",
+    "build_registry",
+]

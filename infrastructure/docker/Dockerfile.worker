@@ -1,0 +1,46 @@
+# GPU worker image.
+#
+# Base is CUDA, NOT python:slim. The old python:3.11-slim base had no CUDA
+# runtime, so torch would fall back to CPU and Wan/FLUX would either crash or
+# run orders of magnitude too slow -- the container would "work" while rendering
+# nothing usable. The whole reason this fleet exists is the GPU; the base image
+# has to expose it.
+#
+# cu121 matches torch==2.4.0's CUDA build and the g5 (A10G) driver line.
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    # Weights live on the mounted model cache (baked into the AMI by Packer),
+    # not inside the image -- a ~35GB image would be unmanageable to push/pull.
+    HF_HOME=/opt/models
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 python3-pip python3.11-venv \
+    ffmpeg libsm6 libxext6 libgl1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python
+
+COPY requirements.txt .
+# torch is pinned to its cu121 wheel so pip doesn't pull the CPU build.
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu121 \
+    -r requirements.txt
+
+COPY . .
+
+# Fail the build if the GPU stack didn't import -- better here than at 3am on a
+# spot instance. This runs on the build host (CPU), so it checks import health,
+# not CUDA availability.
+RUN python -c "import torch, diffusers, transformers; print('deps import OK')"
+
+# Single queue. The old worker listened on seven queues named for pipeline
+# stages that no longer exist (planner/script/character/render/export) -- the
+# rewrite runs the whole slice in one compile_video task off one queue.
+CMD ["celery", "-A", "workers.celery_app", "worker", \
+     "--loglevel=info", \
+     "--concurrency=1", \
+     "--queues=video"]
