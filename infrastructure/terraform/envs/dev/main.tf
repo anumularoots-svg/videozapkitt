@@ -196,6 +196,7 @@ module "observability" {
 # ── GitHub OIDC ────────────────────────────────────────
 
 module "github_oidc" {
+  create_oidc_provider = false
   source = "../../modules/github_oidc"
 
   project     = var.project
